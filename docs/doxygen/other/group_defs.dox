@@ -1,0 +1,7 @@
+/*!
+ * \defgroup block GNU Radio GSM_DECODERS C++ Signal Processing Blocks
+ * \brief All C++ blocks that can be used from the GSM_DECODERS GNU Radio
+ *        module are listed here or in the subcategories below.
+ *
+ */
+
