@@ -22,7 +22,6 @@
 #define INCLUDED_GSM_GET_CCCH_BURSTS_IMPL_H
 
 #include <gsm/get_ccch_bursts.h>
-#include <receiver_config.h>
 
 namespace gr {
   namespace gsm {

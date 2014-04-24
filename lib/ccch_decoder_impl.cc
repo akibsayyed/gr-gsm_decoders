@@ -26,6 +26,13 @@
 #include <gsmtap.h>
 #include "ccch_decoder_impl.h"
 
+//v skompilować blok
+//v dodać wejście wyjście message
+//-dynamiczna zmiana grafu - niepotrzebna w tym momencie
+//-deinterleaving 
+//-dekodowanie crc
+//-dekodowanie
+
 namespace gr {
   namespace gsm_decoders {
     void ccch_decoder_impl::decode(pmt::pmt_t msg)
