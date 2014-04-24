@@ -23,10 +23,67 @@
 #endif
 
 #include <gnuradio/io_signature.h>
+#include <gsmtap.h>
 #include "ccch_decoder_impl.h"
 
 namespace gr {
   namespace gsm_decoders {
+    void ccch_decoder_impl::decode(pmt::pmt_t msg)
+    {
+    	unsigned char iBLOCK[BLOCKS*iBLOCK_SIZE], hl, hn, conv_data[CONV_SIZE], decoded_data[PARITY_OUTPUT_SIZE];
+        d_bursts[d_collected_bursts_num] = msg;
+        d_collected_bursts_num++;
+        //get convecutive bursts
+        pmt::pmt_t header_blob = pmt::car(msg);
+        gsmtap_hdr * header = (gsmtap_hdr *)pmt::blob_data(header_blob);
+        
+        if(d_collected_bursts_num==4)
+        {
+            d_collected_bursts_num=0;
+            //reorganize data
+            for(int ii = 0; ii < 4; ii++)
+            {
+                pmt::pmt_t burst_content = pmt::cdr(d_bursts[ii]);
+                int8_t * burst_bits = (int8_t *)pmt::blob_data(burst_content);
+
+	            for(int jj = 0; jj < 57; jj++)
+	            {
+		            iBLOCK[ii*iBLOCK_SIZE+jj] = burst_bits[jj + 3];
+		            iBLOCK[ii*iBLOCK_SIZE+jj+57] = burst_bits[jj + 88]; //88 = 3+57+1+26+1
+	            }
+            }
+            //deinterleave
+	        for (int k = 0; k < CONV_SIZE; k++)
+	        {
+		        conv_data[k] = iBLOCK[interleave_trans[k]];
+            }
+            //convolutional code decode
+	        int errors = conv_decode(decoded_data, conv_data);
+	        std::cout << "Errors:" << errors << " " << parity_check(decoded_data) << std::endl;
+	        // check parity
+	        // If parity check error detected try to fix it.
+	        
+	        if (parity_check(decoded_data))
+	        {
+		        FC_init(&fc_ctx, 40, 184);
+		        unsigned char crc_result[224];
+		        if (FC_check_crc(&fc_ctx, decoded_data, crc_result) == 0)
+		        {
+			        //("error: sacch: parity error (errors=%d fn=%d)\n", errors, ctx->fn);
+			        std::cout << "Lol!" << std::endl;
+			        errors = -1;
+		        } else {
+			        //DEBUGF("Successfully corrected parity bits! (errors=%d fn=%d)\n", errors, ctx->fn);
+			        std::cout << "Super!" << std::endl;
+			        memcpy(decoded_data, crc_result, sizeof crc_result);
+			        errors = 0;
+		        }
+	        } else {
+	            std::cout << "Nie ma niczego do poprawiania" << std::endl;
+	        }
+        }
+        return;
+    }
 
     ccch_decoder::sptr
     ccch_decoder::make()
@@ -36,45 +93,35 @@ namespace gr {
     }
 
     /*
-     * The private constructor
+     *
      */
     ccch_decoder_impl::ccch_decoder_impl()
       : gr::block("ccch_decoder",
-              gr::io_signature::make(<+MIN_IN+>, <+MAX_IN+>, sizeof(<+ITYPE+>)),
-              gr::io_signature::make(<+MIN_OUT+>, <+MAX_OUT+>, sizeof(<+OTYPE+>)))
-    {}
+              gr::io_signature::make(0, 0, 0),
+              gr::io_signature::make(0, 0, 0)),
+              d_collected_bursts_num(0)
+    {
+        //initialize de/interleaver
+    	int j, k, B;
+    	for (k = 0; k < CONV_SIZE; k++)
+	    {
+		    B = k % 4;
+		    j = 2 * ((49 * k) % 57) + ((k % 8) / 4);
+		    interleave_trans[k] = B * 114 + j; //114=57 + 57
+	    }
+
+		FC_init(&fc_ctx, 40, 184);
+        message_port_register_in(pmt::mp("bursts_in"));
+        set_msg_handler(pmt::mp("bursts_in"), boost::bind(&ccch_decoder_impl::decode, this, _1));
+        message_port_register_out(pmt::mp("msgs_out"));
+    }
 
     /*
-     * Our virtual destructor.
+     *
      */
     ccch_decoder_impl::~ccch_decoder_impl()
     {
     }
-
-    void
-    ccch_decoder_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
-    {
-        /* <+forecast+> e.g. ninput_items_required[0] = noutput_items */
-    }
-
-    int
-    ccch_decoder_impl::general_work (int noutput_items,
-                       gr_vector_int &ninput_items,
-                       gr_vector_const_void_star &input_items,
-                       gr_vector_void_star &output_items)
-    {
-        const <+ITYPE*> *in = (const <+ITYPE*> *) input_items[0];
-        <+OTYPE*> *out = (<+OTYPE*> *) output_items[0];
-
-        // Do <+signal processing+>
-        // Tell runtime system how many input items we consumed on
-        // each input stream.
-        consume_each (noutput_items);
-
-        // Tell runtime system how many output items we produced.
-        return noutput_items;
-    }
-
   } /* namespace gsm_decoders */
 } /* namespace gr */
 

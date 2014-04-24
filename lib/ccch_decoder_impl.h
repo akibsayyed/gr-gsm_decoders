@@ -22,6 +22,8 @@
 #define INCLUDED_GSM_DECODERS_CCCH_DECODER_IMPL_H
 
 #include <gsm_decoders/ccch_decoder.h>
+#include <fire_crc.h>
+#include <cch.h>
 
 namespace gr {
   namespace gsm_decoders {
@@ -29,20 +31,16 @@ namespace gr {
     class ccch_decoder_impl : public ccch_decoder
     {
      private:
-      // Nothing to declare in this block.
-
+      unsigned int d_collected_bursts_num;
+      pmt::pmt_t d_bursts[4];
+      unsigned short interleave_trans[CONV_SIZE];      
+      FC_CTX fc_ctx;      
+      void decode(pmt::pmt_t msg);
      public:
       ccch_decoder_impl();
       ~ccch_decoder_impl();
-
-      // Where all the action really happens
-      void forecast (int noutput_items, gr_vector_int &ninput_items_required);
-
-      int general_work(int noutput_items,
-		       gr_vector_int &ninput_items,
-		       gr_vector_const_void_star &input_items,
-		       gr_vector_void_star &output_items);
     };
+
 
   } // namespace gsm_decoders
 } // namespace gr

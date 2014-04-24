@@ -27,6 +27,8 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 list(APPEND gsm_decoders_sources
     ccch_decoder_impl.cc
+    cch.c
+    fire_crc.c
 )
 
 add_library(gnuradio-gsm_decoders SHARED ${gsm_decoders_sources})
