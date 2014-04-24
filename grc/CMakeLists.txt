@@ -18,5 +18,6 @@
 # Boston, MA 02110-1301, USA.
 
 install(FILES
-    gsm_decoders_ccch_decoder.xml DESTINATION share/gnuradio/grc/blocks
+    gsm_decoders_ccch_decoder.xml
+    gsm_decoders_get_ccch_bursts.xml DESTINATION share/gnuradio/grc/blocks
 )

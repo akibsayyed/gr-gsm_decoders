@@ -29,6 +29,7 @@ list(APPEND gsm_decoders_sources
     ccch_decoder_impl.cc
     cch.c
     fire_crc.c
+    get_ccch_bursts_impl.cc
 )
 
 add_library(gnuradio-gsm_decoders SHARED ${gsm_decoders_sources})

@@ -22,5 +22,6 @@
 ########################################################################
 install(FILES
     api.h
-    ccch_decoder.h DESTINATION include/gsm_decoders
+    ccch_decoder.h
+    get_ccch_bursts.h DESTINATION include/gsm_decoders
 )
