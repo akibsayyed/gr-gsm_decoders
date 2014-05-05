@@ -4,7 +4,7 @@
   <key>gsm_get_ccch_bursts</key>
   <category>GSM</category>
   <import>import gsm</import>
-  <make>gsm.get_ccch_bursts()</make>
+  <make>gsm_decoders.get_ccch_bursts()</make>
   <sink>
     <name>bursts_in</name>
     <type>message</type>

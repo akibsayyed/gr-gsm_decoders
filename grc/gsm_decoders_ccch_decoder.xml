@@ -2,7 +2,7 @@
 <block>
   <name>ccch_decoder</name>
   <key>gsm_decoders_ccch_decoder</key>
-  <category>GSM_decoders</category>
+  <category>GSM</category>
   <import>import gsm_decoders</import>
   <make>gsm_decoders.ccch_decoder()</make>
   <sink>
