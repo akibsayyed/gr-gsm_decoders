@@ -59,10 +59,10 @@ namespace gr {
             }
             //convolutional code decode
 	        int errors = conv_decode(decoded_data, conv_data);
-	        std::cout << "Errors:" << errors << " " << parity_check(decoded_data) << std::endl;
+	        //std::cout << "Errors:" << errors << " " << parity_check(decoded_data) << std::endl;
 	        // check parity
 	        // If parity check error detected try to fix it.
-	        
+
 	        if (parity_check(decoded_data))
 	        {
 		        FC_init(&fc_ctx, 40, 184);
@@ -70,16 +70,16 @@ namespace gr {
 		        if (FC_check_crc(&fc_ctx, decoded_data, crc_result) == 0)
 		        {
 			        //("error: sacch: parity error (errors=%d fn=%d)\n", errors, ctx->fn);
-			        std::cout << "Lol!" << std::endl;
+			        std::cout << "Uncorrectable errors!" << std::endl;
 			        errors = -1;
 		        } else {
 			        //DEBUGF("Successfully corrected parity bits! (errors=%d fn=%d)\n", errors, ctx->fn);
-			        std::cout << "Super!" << std::endl;
+			        std::cout << "Corrected some errors" << std::endl;
 			        memcpy(decoded_data, crc_result, sizeof crc_result);
 			        errors = 0;
 		        }
 	        } else {
-	            std::cout << "Nie ma niczego do poprawiania" << std::endl;
+	            std::cout << "Everything correct" << std::endl;
 	        }
         }
         return;
