@@ -21,14 +21,14 @@
 #ifndef INCLUDED_GSM_GET_CCCH_BURSTS_IMPL_H
 #define INCLUDED_GSM_GET_CCCH_BURSTS_IMPL_H
 
-#include <gsm/get_ccch_bursts.h>
+#include <gsm_decoders/get_ccch_bursts.h>
 
 namespace gr {
-  namespace gsm {
+  namespace gsm_decoders {
 
-    class get_ccch_bursts_impl : public get_ccch_bursts
-    {
+    class get_ccch_bursts_impl : public get_ccch_bursts {
      private:
+         uint32_t d_frame_numbers[4];     
          pmt::pmt_t d_bursts[4];                
      public:
         get_ccch_bursts_impl();

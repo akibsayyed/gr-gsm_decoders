@@ -27,7 +27,7 @@
 #include <gsmtap.h>
 
 namespace gr {
-  namespace gsm {
+  namespace gsm_decoders {
 
     void get_ccch_bursts_impl::filter_ccch(pmt::pmt_t msg)
     {
@@ -35,23 +35,25 @@ namespace gr {
         pmt::pmt_t content = pmt::cdr(msg);
         gsmtap_hdr * header = (gsmtap_hdr *)pmt::blob_data(header_blob);
         uint32_t frame_nr = header->frame_number;
-        uint32_t frame_numbers[4];
+
         uint32_t fn_mod51 = header->frame_number % 51;
-        
+        const int fn51_start = 6;
+        const int fn51_stop = 9;
+
         if(header->timeslot==0){
-            if(fn_mod51>=2 && fn_mod51<=5){
-                uint32_t ii = fn_mod51-2;
-                frame_numbers[ii]=header->frame_number;
+            if(fn_mod51>=fn51_start && fn_mod51<=fn51_stop){
+                uint32_t ii = fn_mod51-fn51_start;
+                d_frame_numbers[ii]=header->frame_number;
                 d_bursts[ii] = msg;
             }
             
-            if(fn_mod51==5){
+            if(fn_mod51==fn51_stop){
                 //check for a situation where some BCCH bursts were lost
                 //in this situation frame numbers won't be consecutive
                 bool frames_are_consecutive = true;
                 for(int jj=1; jj<4; jj++)
                 {
-                    if((frame_numbers[jj]-frame_numbers[jj-1])!=1){
+                    if((d_frame_numbers[jj]-d_frame_numbers[jj-1])!=1){
                         frames_are_consecutive = false;
                     }
                 }
@@ -62,7 +64,7 @@ namespace gr {
                     {
                         message_port_pub(pmt::mp("bursts_out"), d_bursts[jj]);
                     }              
-                }
+                } 
             }
         }
     }
